@@ -25,7 +25,7 @@ import { Storage } from '@google-cloud/storage';
 import { v4 as uuidv4 } from 'uuid';
 
 dotenv.config();
-const serviceAccount = JSON.parse(process.env.CLOUD_STORAGE_SERVICE_ACCOUNT);
+const serviceAccount = JSON.parse(Buffer.from(process.env.CLOUD_STORAGE_SERVICE_ACCOUNT, 'base64').toString('ascii'));
 
 const storage = new Storage({
     projectId: serviceAccount.project_id,
@@ -35,7 +35,7 @@ const storage = new Storage({
     },
 });
 
-const firebaseAdminConfig = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+const firebaseAdminConfig = JSON.parse(Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT, 'base64').toString('ascii'));
 admin.initializeApp({
     credential: admin.credential.cert(firebaseAdminConfig),
     databaseURL: "https://capstone-424513.firebaseio.com"
