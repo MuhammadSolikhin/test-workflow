@@ -1,0 +1,56 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1
+      with:
+        version: 'latest'
+        service_account_key: ${{ secrets.CLOUD_STORAGE_SERVICE_ACCOUNT }}
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+    - name: Log in to Google Cloud
+      run: echo ${{ secrets.CLOUD_STORAGE_SERVICE_ACCOUNT }} | base64 --decode > ${HOME}/gcloud.json
+
+    - name: Authenticate to Google Cloud
+      run: gcloud auth activate-service-account --key-file=${HOME}/gcloud.json
+
+    - name: Configure gcloud
+      run: gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
+
+    - name: Set up Cloud Storage Service Account
+      run: echo ${{ secrets.CLOUD_STORAGE_SERVICE_ACCOUNT }} | base64 --decode > ${HOME}/cloud_storage.json
+
+    - name: Set up Firebase Service Account
+      run: echo ${{ secrets.FIREBASE_SERVICE_ACCOUNT }} | base64 --decode > ${HOME}/firebase.json
+
+    - name: Build Docker image
+      run: |
+        docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.CLOUD_RUN_SERVICE_NAME }}:latest .
+
+    - name: Push Docker image to Container Registry
+      run: |
+        gcloud auth configure-docker
+        docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.CLOUD_RUN_SERVICE_NAME }}:latest
+
+    - name: Deploy to Cloud Run
+      run: |
+        gcloud run deploy ${{ secrets.CLOUD_RUN_SERVICE_NAME }} \
+          --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.CLOUD_RUN_SERVICE_NAME }}:latest \
+          --region ${{ secrets.GCP_REGION }} \
+          --platform managed \
+          --allow-unauthenticated \
+          --set-env-vars CLOUD_STORAGE_SERVICE_ACCOUNT=$(cat ${HOME}/cloud_storage.json) \
+          --set-env-vars FIREBASE_SERVICE_ACCOUNT=$(cat ${HOME}/firebase.json)
