@@ -29,16 +29,10 @@ jobs:
         docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/my-app:latest .
         docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/my-app:latest
 
-    - name: Set up Cloud SDK
-      uses: google-github-actions/setup-gcloud@v1
+    - name: Authenticate with Google Cloud
+      uses: google-github-actions/auth@v0
       with:
-        project_id: ${{ secrets.GCP_PROJECT_ID }}
         service_account_key: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
-
-    - name: Decode and set secrets as environment variables
-      run: |
-        echo ${{ secrets.CLOUD_STORAGE_SERVICE_ACCOUNT_B64 }} | base64 --decode > ${HOME}/cloud_storage.json
-        echo ${{ secrets.FIREBASE_SERVICE_ACCOUNT_B64 }} | base64 --decode > ${HOME}/firebase.json
 
     - name: Deploy to Cloud Run
       run: |
