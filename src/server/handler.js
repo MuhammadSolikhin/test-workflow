@@ -1,6 +1,5 @@
 import { initializeApp } from 'firebase/app';
 import fs from 'fs';
-import path from 'path';
 import {
     getAuth,
     signInWithPopup,
@@ -27,11 +26,9 @@ import { Storage } from '@google-cloud/storage';
 import { v4 as uuidv4 } from 'uuid';
 
 dotenv.config();
-const cloudStorageServiceAccountPath = process.env.CLOUD_STORAGE_SERVICE_ACCOUNT_PATH;
-const firebaseServiceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
 
-const serviceAccount = JSON.parse(fs.readFileSync(cloudStorageServiceAccountPath, 'utf8'));
-const firebaseAdminConfig = JSON.parse(fs.readFileSync(firebaseServiceAccountPath, 'utf8'));
+const serviceAccount = JSON.parse(process.env.CLOUD_STORAGE_SERVICE_ACCOUNT);
+const firebaseAdminConfig = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
 const storage = new Storage({
     projectId: serviceAccount.project_id,
