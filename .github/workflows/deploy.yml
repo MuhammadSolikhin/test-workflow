@@ -34,11 +34,13 @@ jobs:
       with:
         credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
 
-    - name: Decode Cloud Storage Service Account
-      run: echo "${{ secrets.CLOUD_STORAGE_SERVICE_ACCOUNT }}" | base64 --decode > ${HOME}/cloud_storage.json
+    - name: Decode and Set Cloud Storage Service Account
+      run: |
+        echo "CLOUD_STORAGE_SERVICE_ACCOUNT=$(echo '${{ secrets.CLOUD_STORAGE_SERVICE_ACCOUNT }}' | base64 --decode)" >> $GITHUB_ENV
 
-    - name: Decode Firebase Service Account
-      run: echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" | base64 --decode > ${HOME}/firebase.json
+    - name: Decode and Set Firebase Service Account
+      run: |
+        echo "FIREBASE_SERVICE_ACCOUNT=$(echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' | base64 --decode)" >> $GITHUB_ENV
 
     - name: Deploy to Cloud Run
       run: |
@@ -48,8 +50,8 @@ jobs:
           --platform managed \
           --port 3000 \
           --allow-unauthenticated \
-          --set-env-vars CLOUD_STORAGE_SERVICE_ACCOUNT_PATH="${HOME}/cloud_storage.json" \
-          --set-env-vars FIREBASE_SERVICE_ACCOUNT_PATH="${HOME}/firebase.json"
+          --set-env-vars CLOUD_STORAGE_SERVICE_ACCOUNT="${{ env.CLOUD_STORAGE_SERVICE_ACCOUNT }}" \
+          --set-env-vars FIREBASE_SERVICE_ACCOUNT="${{ env.FIREBASE_SERVICE_ACCOUNT }}"
       env:
         CLOUDSDK_METRICS_ENVIRONMENT: github-actions-setup-gcloud
         CLOUDSDK_METRICS_ENVIRONMENT_VERSION: 1.1.1
