@@ -42,8 +42,8 @@ jobs:
           --platform managed \
           --port 3000 \
           --allow-unauthenticated \
-          --set-env-vars CLOUD_STORAGE_SERVICE_ACCOUNT="$(cat ${HOME}/cloud_storage.json | base64 -w 0)" \
-          --set-env-vars FIREBASE_SERVICE_ACCOUNT="$(cat ${HOME}/firebase.json | base64 -w 0)"
+          --set-env-vars CLOUD_STORAGE_SERVICE_ACCOUNT="$(cat ${HOME}/cloud_storage.json)" \
+          --set-env-vars FIREBASE_SERVICE_ACCOUNT="$(cat ${HOME}/firebase.json)"
       env:
         CLOUDSDK_METRICS_ENVIRONMENT: github-actions-setup-gcloud
         CLOUDSDK_METRICS_ENVIRONMENT_VERSION: 1.1.1
