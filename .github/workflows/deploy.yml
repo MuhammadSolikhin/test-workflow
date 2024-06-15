@@ -35,32 +35,21 @@ jobs:
         credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
 
     - name: Decode Cloud Storage Service Account
-      run: |
-        echo "${{ secrets.CLOUD_STORAGE_SERVICE_ACCOUNT }}" | base64 --decode > ${HOME}/cloud_storage.json
+      run: echo "${{ secrets.CLOUD_STORAGE_SERVICE_ACCOUNT }}" | base64 --decode > ${HOME}/cloud_storage.json
 
     - name: Decode Firebase Service Account
+      run: echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" | base64 --decode > ${HOME}/firebase.json
+
+    - name: Deploy to Cloud Run
       run: |
-        echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" | base64 --decode > ${HOME}/firebase.json
-
-    - name: Decode and Set Environment Variables
-      run: |
-        if [ ! -x "$(command -v jq)" ]; then
-          echo "jq not found, installing..."
-          sudo apt-get update
-          sudo apt-get install -y jq
-        fi
-
-        export CLOUD_STORAGE_SERVICE_ACCOUNT=$(cat ${HOME}/cloud_storage.json | jq -sRr @uri)
-        export FIREBASE_SERVICE_ACCOUNT=$(cat ${HOME}/firebase.json | jq -sRr @uri)
-
         gcloud run deploy test-workflow \
           --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/my-app:latest \
           --region ${{ secrets.GCP_REGION }} \
           --platform managed \
           --port 3000 \
           --allow-unauthenticated \
-          --set-env-vars CLOUD_STORAGE_SERVICE_ACCOUNT="$CLOUD_STORAGE_SERVICE_ACCOUNT" \
-          --set-env-vars FIREBASE_SERVICE_ACCOUNT="$FIREBASE_SERVICE_ACCOUNT"
+          --set-env-vars CLOUD_STORAGE_SERVICE_ACCOUNT_PATH="${HOME}/cloud_storage.json" \
+          --set-env-vars FIREBASE_SERVICE_ACCOUNT_PATH="${HOME}/firebase.json"
       env:
         CLOUDSDK_METRICS_ENVIRONMENT: github-actions-setup-gcloud
         CLOUDSDK_METRICS_ENVIRONMENT_VERSION: 1.1.1
