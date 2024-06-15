@@ -27,8 +27,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 dotenv.config();
 
-const serviceAccount = JSON.parse(`'${process.env.CLOUD_STORAGE_SERVICE_ACCOUNT}'`);
-const firebaseAdminConfig = JSON.parse(`'${process.env.FIREBASE_SERVICE_ACCOUNT}'`);
+const serviceAccount = JSON.parse(process.env.CLOUD_STORAGE_SERVICE_ACCOUNT);
+const firebaseAdminConfig = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
 const storage = new Storage({
     projectId: serviceAccount.project_id,
